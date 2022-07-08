@@ -42,6 +42,7 @@ impl Display for RightAscension {
 /// Representation of declination (or DEC shortly) in degrees,
 /// minutes and seconds.
 pub struct Declination {
+    pub negative: bool,
     pub degrees: i16,
     pub minutes: u16,
     pub seconds: f64,
@@ -49,8 +50,20 @@ pub struct Declination {
 
 impl Declination {
     pub fn new(d: i16, m: u16, s: f64) -> Self {
+        let deg;
+        let neg;
+
+        if d < 0 {
+            neg = true;
+            deg = d * -1;
+        } else {
+            neg = false;
+            deg = d;
+        };
+
         Self {
-            degrees: d,
+            negative: neg,
+            degrees: deg,
             minutes: m,
             seconds: s,
         }
