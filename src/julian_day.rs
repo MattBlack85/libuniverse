@@ -3,6 +3,7 @@ use crate::Date;
 pub fn get_julian_day(date: &Date) -> f64 {
     let year;
     let month;
+    let b: i16;
 
     match date.month {
         3..=12 => {
@@ -10,13 +11,11 @@ pub fn get_julian_day(date: &Date) -> f64 {
             month = date.month;
         }
         1..=2 => {
-            year = date.year + 1;
+            year = date.year - 1;
             month = date.month + 12;
         }
         _ => panic!("Error"),
     }
-
-    let b: i16;
 
     if year > 1582 || (year == 1582 && (month > 10 || (month == 10 && date.day >= 4.0))) {
         // Gregorian calendar
@@ -27,7 +26,7 @@ pub fn get_julian_day(date: &Date) -> f64 {
     }
 
     let left_side = (365.25 as f64 * (year + 4716) as f64) as i64;
-    let right_side = (30.6 as f64 * (month + 1) as f64) as i64;
+    let right_side = (30.6001 as f64 * (month + 1) as f64) as i64;
 
     left_side as f64 + right_side as f64 + date.day + b as f64 - 1524.5
 }
