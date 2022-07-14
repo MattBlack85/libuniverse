@@ -39,16 +39,15 @@ impl Display for RightAscension {
     }
 }
 
-/// Representation of declination (or DEC shortly) in degrees,
-/// minutes and seconds.
-pub struct Declination {
+/// Representation of a position in degrees, minutes and seconds.
+pub struct DegMinSec {
     pub negative: bool,
     pub degrees: i16,
     pub minutes: u16,
     pub seconds: f64,
 }
 
-impl Declination {
+impl DegMinSec {
     pub fn new(d: i16, m: u16, s: f64) -> Self {
         let deg;
         let neg;
@@ -70,7 +69,7 @@ impl Declination {
     }
 }
 
-impl Display for Declination {
+impl Display for DegMinSec {
     fn fmt(&self, f: &mut Formatter) -> Result {
         write!(
             f,
@@ -78,6 +77,18 @@ impl Display for Declination {
             self.degrees, self.minutes, self.seconds
         )
     }
+}
+
+pub type Declination = DegMinSec;
+
+struct EqPosition {
+    ra: RightAscension,
+    dec: Declination,
+}
+
+pub struct LongLatPosition {
+    pub long: DegMinSec,
+    pub lat: DegMinSec,
 }
 
 #[cfg(test)]
