@@ -1,4 +1,4 @@
-use crate::{Declination, RightAscension};
+use crate::{DegMinSec, RightAscension};
 
 pub fn ra_to_deg(ra: &RightAscension) -> f64 {
     let mut deg =
@@ -21,6 +21,26 @@ pub fn dec_to_deg(dec: &Declination) -> f64 {
 
     deg
 }
+
+pub fn deg_to_dms(degrees: f64) -> DegMinSec {
+
+    let mut n_deg: i16 = degrees as i16;
+    let mut n_minutes: f64 = 60.0 * (degrees.abs() - n_deg as f64);
+    let mut n_secs: f64 = 60.0 * (n_minutes - n_minutes as u8);
+
+    if n_secs > 59 {
+    	n_secs = 0.0;
+    	n_minutes += 1;
+    }
+    
+    if n_minutes > 59 {
+    	n_minutes = 0;
+    	n_deg += 1;
+    }
+    
+    Declination::new(n_deg, n_minutes as u8, n_secs)
+}
+
 
 #[cfg(test)]
 mod tests {

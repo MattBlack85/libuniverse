@@ -43,12 +43,12 @@ impl Display for RightAscension {
 pub struct DegMinSec {
     pub negative: bool,
     pub degrees: i16,
-    pub minutes: u16,
+    pub minutes: u8,
     pub seconds: f64,
 }
 
 impl DegMinSec {
-    pub fn new(d: i16, m: u16, s: f64) -> Self {
+    pub fn new(d: i16, m: u8, s: f64) -> Self {
         let deg;
         let neg;
 
