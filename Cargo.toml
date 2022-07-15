@@ -1,5 +1,5 @@
 [package]
-name = "universe"
+name = "runiverse"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
@@ -10,7 +10,7 @@ description = "A pure and safe Rust library to make astronomical calculations an
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
-name = "universe"
+name = "runiverse"
 path = "src/lib.rs"
 crate-type = ["dylib", "lib"]
 
