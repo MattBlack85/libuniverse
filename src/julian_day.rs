@@ -1,5 +1,6 @@
 use crate::Date;
 
+#[derive(Debug, PartialEq, PartialOrd)]
 pub struct JulianDay {
     value: f64,
 }
@@ -169,5 +170,15 @@ mod test {
     fn test_jd_to_modified_jd() {
         let jd = JulianDay::new(2436116.31);
         assert_eq!(jd.get_value() - 2_400_000.5, jd.to_modified_jd());
+    }
+
+    #[test]
+    fn test_jd_equality() {
+        assert_eq!(JulianDay::new(2436116.31), JulianDay::new(2436116.31));
+        assert_eq!(JulianDay::new(2000.0) > JulianDay::new(1000.0), true);
+        assert_eq!(
+            JulianDay::new(139_164.0) < JulianDay::new(2_451_911.0),
+            true
+        );
     }
 }
