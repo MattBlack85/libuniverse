@@ -11,7 +11,7 @@ pub fn ra_to_deg(ra: &RightAscension) -> f64 {
     deg
 }
 
-pub fn dec_to_deg(dec: &Declination) -> f64 {
+pub fn dec_to_deg(dec: &DegMinSec) -> f64 {
     let mut deg =
         dec.degrees as f64 + dec.minutes as f64 / 60 as f64 + dec.seconds as f64 / 3600 as f64;
 
@@ -22,30 +22,29 @@ pub fn dec_to_deg(dec: &Declination) -> f64 {
     deg
 }
 
+/// Utility to go easily from a decimal degree to a Degree-minutes
 pub fn deg_to_dms(degrees: f64) -> DegMinSec {
-
     let mut n_deg: i16 = degrees as i16;
-    let mut n_minutes: f64 = 60.0 * (degrees.abs() - n_deg as f64);
-    let mut n_secs: f64 = 60.0 * (n_minutes - n_minutes as u8);
+    let mut n_minutes: f64 = 60.0 * (degrees.abs() - n_deg.abs() as f64);
+    let mut n_secs: f64 = 60.0 * (n_minutes - (n_minutes as u8) as f64);
 
-    if n_secs > 59 {
-    	n_secs = 0.0;
-    	n_minutes += 1;
+    if n_secs > 59.0 {
+        n_secs = 0.0;
+        n_minutes += 1.0;
     }
-    
-    if n_minutes > 59 {
-    	n_minutes = 0;
-    	n_deg += 1;
+
+    if n_minutes > 59.0 {
+        n_minutes = 0.0;
+        n_deg += 1;
     }
-    
-    Declination::new(n_deg, n_minutes as u8, n_secs)
+
+    DegMinSec::new(n_deg, n_minutes as u8, n_secs)
 }
-
 
 #[cfg(test)]
 mod tests {
-    use crate::transform::{dec_to_deg, ra_to_deg};
-    use crate::{Declination, RightAscension};
+    use crate::transform::{dec_to_deg, deg_to_dms, ra_to_deg};
+    use crate::{Declination, DegMinSec, RightAscension};
 
     #[test]
     fn test_ra_2h_30m_45s() {
@@ -69,5 +68,17 @@ mod tests {
     fn test_dec_min_81_7_59() {
         let dec = Declination::new(-81, 7, 59.0);
         assert_eq!(math::round::half_down(dec_to_deg(&dec), 4), -81.1331);
+    }
+
+    #[test]
+    fn test_89_6078d_to89d_36m_28s() {
+        let test_dms = DegMinSec::new(89, 36, 28.08);
+        assert_eq!(deg_to_dms(89.6078), test_dms);
+    }
+
+    #[test]
+    fn test_minus_59_1936d_to89d_36m_28s() {
+        let test_dms = DegMinSec::new(-59, 11, 36.96);
+        assert_eq!(deg_to_dms(-59.1936), test_dms);
     }
 }

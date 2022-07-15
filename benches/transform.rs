@@ -1,6 +1,6 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
-use universe::transform::ra_to_deg;
+use universe::transform::{deg_to_dms, ra_to_deg};
 use universe::RightAscension;
 
 fn ra_to_deg_positive_angle(c: &mut Criterion) {
@@ -17,5 +17,25 @@ fn ra_to_deg_negative_angle(c: &mut Criterion) {
     });
 }
 
-criterion_group!(benches, ra_to_deg_positive_angle, ra_to_deg_negative_angle);
+fn deg_to_negative_dms(c: &mut Criterion) {
+    let deg = black_box(43.0194);
+    c.bench_function("Transform negative angle degrees to dd:mm:ss", |b| {
+        b.iter(|| deg_to_dms(deg))
+    });
+}
+
+fn deg_to_positive_dms(c: &mut Criterion) {
+    let deg = black_box(78.1038);
+    c.bench_function("Transform positive angle degrees to dd:mm:ss", |b| {
+        b.iter(|| deg_to_dms(deg))
+    });
+}
+
+criterion_group!(
+    benches,
+    ra_to_deg_positive_angle,
+    ra_to_deg_negative_angle,
+    deg_to_negative_dms,
+    deg_to_positive_dms
+);
 criterion_main!(benches);
