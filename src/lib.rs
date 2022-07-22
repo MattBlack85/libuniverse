@@ -7,17 +7,31 @@ pub mod julian_day;
 pub mod sidereal_time;
 pub mod transform;
 
+/// Rework a big angle so it can fit in the standard range 0-360
+fn fit_degrees(orig_angle: f64) -> f64 {
+    if orig_angle >= 0.0 && orig_angle < 360.0 {
+        return orig_angle;
+    }
+
+    let mut final_angle: f64 = ((orig_angle / 360_f64) as i64) as f64;
+
+    if orig_angle < 0.0 {
+        final_angle -= 1.0;
+    }
+    final_angle *= 360.0;
+    orig_angle - final_angle
+}
 
 /// Representation of right ascension coordinates (or RA shortly)
 /// in hours, minutes and seconds.
 #[derive(Debug)]
-pub struct RightAscension {
+pub struct HoursMinSec {
     pub hours: u8,
     pub minutes: u8,
     pub seconds: f64,
 }
 
-impl RightAscension {
+impl HoursMinSec {
     pub fn new(h: u8, m: u8, s: f64) -> Self {
         Self {
             hours: h,
@@ -50,13 +64,13 @@ impl RightAscension {
     }
 }
 
-impl Display for RightAscension {
+impl Display for HoursMinSec {
     fn fmt(&self, f: &mut Formatter) -> Result {
         write!(f, "{}h {}m {}s", self.hours, self.minutes, self.seconds)
     }
 }
 
-impl PartialEq for RightAscension {
+impl PartialEq for HoursMinSec {
     fn eq(&self, other: &Self) -> bool {
         self.hours == other.hours
             && self.minutes == other.minutes
@@ -150,6 +164,7 @@ impl PartialEq for DegMinSec {
 impl Eq for DegMinSec {}
 
 pub type Declination = DegMinSec;
+pub type RightAscension = HoursMinSec;
 
 struct EqPosition {
     ra: RightAscension,
@@ -215,38 +230,5 @@ mod test {
         assert_eq!(eq_pos.ra, ra);
         assert_eq!(eq_pos.dec, dec);
         assert_eq!(format!("{}", eq_pos), "ra:23h 44m 1s dec:-28° 9' 44.08''");
-    }
-
-    #[test]
-    fn test_date_to_julian_date() {
-        let date = Date::new(1900, 1, 1.0);
-        assert_eq!(date.to_julian_day().get_value(), 2_415_020.5);
-    }
-
-    #[test]
-    fn test_date_intervals() {
-        // From Meeus book "astronomical algorithms" p.64 example 7.d
-        let date_1 = Date::new(1910, 4, 20.0);
-        let date_2 = Date::new(1986, 2, 9.0);
-        assert_eq!(date_1.interval(&date_2), 27689.0);
-    }
-
-    #[test]
-    fn test_day_of_the_week_meeus() {
-        // From Meeus book "astronomical algorithms" p.65 example 7.e
-        let date = Date::new(1954, 6, 30.0);
-        assert_eq!(date.week_day(), 3);
-    }
-
-    #[test]
-    fn test_day_of_the_week_online_calculator() {
-        let date = Date::new(478, 3, 11.0);
-        assert_eq!(date.week_day(), 6);
-    }
-
-    #[test]
-    fn test_day_of_the_year_meeus_book() {
-        let date = Date::new(1978, 11, 14.0);
-        assert_eq!(date.year_day(), 318);
     }
 }

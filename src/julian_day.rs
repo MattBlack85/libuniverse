@@ -96,8 +96,8 @@ pub fn get_julian_day(date: &Date) -> f64 {
 
 #[cfg(test)]
 mod test {
-    use crate::julian_day::{get_julian_day, JulianDay};
     use crate::date::Date;
+    use crate::julian_day::{get_julian_day, JulianDay};
 
     #[test]
     fn test_sputnik_launch_date_to_julian_date() {

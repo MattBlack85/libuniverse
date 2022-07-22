@@ -66,7 +66,6 @@ mod tests {
         assert_eq!(deg_to_ra(37.6875), ra);
     }
 
-
     #[test]
     fn test_ra_23h_54m_21s() {
         let ra = RightAscension::new(23, 54, 21.0);
