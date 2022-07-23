@@ -1,7 +1,7 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
-use universe::julian_day::get_julian_day;
-use universe::Date;
+use runiverse::date::Date;
+use runiverse::julian_day::get_julian_day;
 
 fn get_julian_day_benchmark(c: &mut Criterion) {
     let date = black_box(Date::new(-1001, 8, 17.9));

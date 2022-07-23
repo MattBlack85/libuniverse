@@ -11,6 +11,14 @@ pub fn ra_to_deg(ra: &RightAscension) -> f64 {
     deg
 }
 
+pub fn deg_to_ra(deg: f64) -> RightAscension {
+    let hours = (deg / 15_f64) as u8;
+    let minutes = ((deg - (hours * 15) as f64) * 4_f64) as u8;
+    let secs = (deg - (hours * 15) as f64 - (minutes as f64 / 4_f64)) * 240_f64;
+
+    RightAscension::new(hours, minutes, secs)
+}
+
 pub fn dec_to_deg(dec: &DegMinSec) -> f64 {
     let mut deg =
         dec.degrees as f64 + dec.minutes as f64 / 60 as f64 + dec.seconds as f64 / 3600 as f64;
@@ -43,13 +51,19 @@ pub fn deg_to_dms(degrees: f64) -> DegMinSec {
 
 #[cfg(test)]
 mod tests {
-    use crate::transform::{dec_to_deg, deg_to_dms, ra_to_deg};
+    use crate::transform::{dec_to_deg, deg_to_dms, deg_to_ra, ra_to_deg};
     use crate::{Declination, DegMinSec, RightAscension};
 
     #[test]
     fn test_ra_2h_30m_45s() {
         let ra = RightAscension::new(2, 30, 45.0);
         assert_eq!(ra_to_deg(&ra), 37.6875);
+    }
+
+    #[test]
+    fn test_deg_to_ra() {
+        let ra = RightAscension::new(2, 30, 45.0);
+        assert_eq!(deg_to_ra(37.6875), ra);
     }
 
     #[test]

@@ -1,4 +1,4 @@
-use crate::Date;
+use crate::date::Date;
 
 #[derive(Debug, PartialEq, PartialOrd)]
 pub struct JulianDay {
@@ -96,8 +96,8 @@ pub fn get_julian_day(date: &Date) -> f64 {
 
 #[cfg(test)]
 mod test {
+    use crate::date::Date;
     use crate::julian_day::{get_julian_day, JulianDay};
-    use crate::Date;
 
     #[test]
     fn test_sputnik_launch_date_to_julian_date() {
