@@ -13,6 +13,7 @@ pub fn get_mean_sidereal_time_from_date(date: &Date) -> f64 {
 mod test {
     use crate::date::Date;
     use crate::sidereal_time::get_mean_sidereal_time_from_date;
+    use crate::HoursMinSec;
     use crate::RightAscension;
 
     #[test]
