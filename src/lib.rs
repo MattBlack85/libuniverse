@@ -10,7 +10,7 @@ pub mod transform;
 
 /// Rework a big angle so it can fit in the standard range 0-360
 fn fit_degrees(orig_angle: f64) -> f64 {
-    if orig_angle >= 0.0 && orig_angle < 360.0 {
+    if (0.0..360.0).contains(&orig_angle) {
         return orig_angle;
     }
 
@@ -33,6 +33,7 @@ pub struct HoursMinSec {
 }
 
 impl HoursMinSec {
+    #[must_use]
     pub fn new(h: u8, m: u8, s: f64) -> Self {
         Self {
             hours: h,
@@ -41,6 +42,7 @@ impl HoursMinSec {
         }
     }
 
+    #[must_use]
     pub fn from_degrees(deg: f64) -> Self {
         transform::deg_to_ra(deg)
     }
@@ -49,6 +51,7 @@ impl HoursMinSec {
     /// DRAGONS AHEAD!
     /// Using this method implies you possibly already knows that the format
     /// is accepted, this method panics if the string doesn't match the regex.
+    #[must_use]
     pub fn from_string(s: &str) -> Self {
         let num_spaces_reg = Regex::new(r"^(\d{2}) (\d{2}) (\d{2}(\.\d{1,2})?)$").unwrap();
         let caps = num_spaces_reg.captures(s);
@@ -91,26 +94,28 @@ pub struct DegMinSec {
 }
 
 impl DegMinSec {
+    #[must_use]
     pub fn new(d: i16, m: u8, s: f64) -> Self {
-        let deg;
+        let degrees;
         let neg;
 
         if d < 0 {
             neg = true;
-            deg = d * -1;
+            degrees = -d;
         } else {
             neg = false;
-            deg = d;
+            degrees = d;
         };
 
         Self {
             negative: neg,
-            degrees: deg,
+            degrees,
             minutes: m,
             seconds: s,
         }
     }
 
+    #[must_use]
     pub fn from_degrees(deg: f64) -> Self {
         transform::deg_to_dms(deg)
     }
@@ -119,6 +124,7 @@ impl DegMinSec {
     /// DRAGONS AHEAD!
     /// Using this method implies you possibly already knows that the format
     /// is accepted, this method panics if the string doesn't match the regex.
+    #[must_use]
     pub fn from_string(s: &str) -> Self {
         let num_spaces_reg = Regex::new(r"^(-?\d{2}) (\d{2}) (\d{2}(\.\d{1,2})?)$").unwrap();
         let caps = num_spaces_reg.captures(s);
@@ -194,7 +200,6 @@ pub struct LongLatPosition {
 
 #[cfg(test)]
 mod test {
-    use crate::date::Date;
     use crate::{Declination, EqPosition, RightAscension};
 
     #[test]

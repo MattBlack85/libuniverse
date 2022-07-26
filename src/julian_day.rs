@@ -39,11 +39,12 @@ impl JulianDay {
         }
 
         let b: i32 = a + 1524;
-        let c: i16 = ((b as f64 - 122.1_f64) / 365.25) as i16;
-        let d: i32 = (365.25_f64 * c as f64) as i32;
+        let c: i16 = ((f64::from(b) - 122.1_f64) / 365.25) as i16;
+        let d: i32 = (365.25_f64 * f64::from(c)) as i32;
         let e: u8 = ((b - d) as f64 / 30.6001_f64) as u8;
 
-        let day: f64 = (b - d - (30.6001_f64 * e as f64) as i32) as f64 + f;
+        let day: f64 = (b - d - (30.6001_f64 * f64::from(e)) as i32) as f64 + f;
+
         let month: u8 = {
             if e < 14 {
                 e - 1
@@ -51,6 +52,7 @@ impl JulianDay {
                 e - 13
             }
         };
+
         let year: i16 = {
             if month > 2 {
                 c - 4716
@@ -66,7 +68,6 @@ impl JulianDay {
 pub fn get_julian_day(date: &Date) -> f64 {
     let year;
     let month;
-    let b: i16;
 
     match date.month {
         3..=12 => {
@@ -80,18 +81,19 @@ pub fn get_julian_day(date: &Date) -> f64 {
         _ => panic!("Error"),
     }
 
-    if year > 1582 || (year == 1582 && (month > 10 || (month == 10 && date.day >= 4.0))) {
-        // Gregorian calendar
-        b = 2 - (year / 100) + ((year / 100) / 4);
-    } else {
-        // Julian calendar
-        b = 0;
-    }
+    let b: i16 =
+        if year > 1582 || (year == 1582 && (month > 10 || (month == 10 && date.day >= 4.0))) {
+            // Gregorian calendar
+            2 - (year / 100) + ((year / 100) / 4)
+        } else {
+            // Julian calendar
+            0
+        };
 
-    let left_side = (365.25 as f64 * (year + 4716) as f64) as i64;
-    let right_side = (30.6001 as f64 * (month + 1) as f64) as i64;
+    let left_side = (365.25_f64 * f64::from(year + 4716)) as i64;
+    let right_side = (30.6001_f64 * f64::from(month + 1)) as i64;
 
-    left_side as f64 + right_side as f64 + date.day + b as f64 - 1524.5
+    left_side as f64 + right_side as f64 + date.day + b as f64 - 1524.5_f64
 }
 
 #[cfg(test)]
