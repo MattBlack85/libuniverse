@@ -224,14 +224,14 @@ mod test {
     #[test]
     fn test_parse_dms_from_simple_str() {
         let dec1 = Declination::from_string("-28 09 44.08");
-        let dec2 = Declination::new(-28, 09, 44.08);
+        let dec2 = Declination::new(-28, 9, 44.08);
         assert_eq!(dec1, dec2);
     }
 
     #[test]
     fn test_eq_pos() {
         let ra = RightAscension::new(23, 44, 01.0);
-        let dec = Declination::new(-28, 09, 44.08);
+        let dec = Declination::new(-28, 9, 44.08);
         let eq_pos = EqPosition::from_string("23 44 01", "-28 09 44.08");
         assert_eq!(eq_pos.ra, ra);
         assert_eq!(eq_pos.dec, dec);

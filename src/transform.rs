@@ -1,5 +1,6 @@
 use crate::{DegMinSec, RightAscension};
 
+#[must_use]
 pub fn ra_to_deg(ra: &RightAscension) -> f64 {
     let mut deg =
         (f64::from(ra.hours) + f64::from(ra.minutes) / 60_f64 + ra.seconds / 3600_f64) * 15_f64;
@@ -10,6 +11,7 @@ pub fn ra_to_deg(ra: &RightAscension) -> f64 {
     deg
 }
 
+#[must_use]
 pub fn deg_to_ra(deg: f64) -> RightAscension {
     let hours = (deg / 15_f64) as u8;
     let minutes = ((deg - f64::from(hours * 15)) * 4_f64) as u8;
@@ -18,6 +20,7 @@ pub fn deg_to_ra(deg: f64) -> RightAscension {
     RightAscension::new(hours, minutes, secs)
 }
 
+#[must_use]
 pub fn dec_to_deg(dec: &DegMinSec) -> f64 {
     let mut degrees =
         f64::from(dec.degrees) + f64::from(dec.minutes) / 60_f64 + dec.seconds as f64 / 3600_f64;
@@ -30,10 +33,11 @@ pub fn dec_to_deg(dec: &DegMinSec) -> f64 {
 }
 
 /// Utility to go easily from a decimal degree to a Degree-minutes
+#[must_use]
 pub fn deg_to_dms(degrees: f64) -> DegMinSec {
     let mut n_deg: i16 = degrees as i16;
     let mut n_minutes: f64 = 60_f64 * (degrees.abs() - f64::from(n_deg.abs()));
-    let mut n_secs: f64 = 60.0 * (n_minutes - (n_minutes as u8) as f64);
+    let mut n_secs: f64 = 60.0 * (n_minutes - f64::from(n_minutes as u8));
 
     if n_secs > 59.0 {
         n_secs = 0.0;
@@ -68,7 +72,7 @@ mod tests {
     #[test]
     fn test_ra_23h_54m_21s() {
         let ra = RightAscension::new(23, 54, 21.0);
-        assert_eq!(ra_to_deg(&ra), -1.4125000000000227);
+        assert_eq!(ra_to_deg(&ra), -1.412_500_000_000_022_7);
     }
 
     #[test]

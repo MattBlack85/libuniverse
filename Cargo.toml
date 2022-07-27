@@ -1,12 +1,14 @@
 [package]
 name = "runiverse"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 license = "MIT"
 repository = "https://github.com/MattBlack85/libuniverse/"
 authors = ["Mattia Procopio"]
 readme = "README.md"
 description = "A pure and safe Rust library to make astronomical calculations and solve astronomical algorithms"
+categories = ["algorithms", "science"]
+keywords = ["libnova", "astronomy", "astrophotography", "meeus"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]

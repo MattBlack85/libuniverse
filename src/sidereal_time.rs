@@ -1,11 +1,13 @@
 use crate::date::Date;
 use crate::fit_degrees;
 
+#[must_use]
 pub fn get_mean_sidereal_time_from_date(date: &Date) -> f64 {
     let jd = date.to_julian_day().get_value();
-    let t = (&jd - 2451545_f64) / 36525_f64;
-    let theta = 280.46061837 + 360.98564736629 * (&jd - 2_451_545_f64) + (0.000387933 * (t * t))
-        - ((t * t * t) / 38_710_000_f64);
+    let t = (&jd - 2_451_545_f64) / 36525_f64;
+    let theta =
+        280.460_618_37 + 360.985_647_366_29 * (&jd - 2_451_545_f64) + (0.000_387_933 * (t * t))
+            - ((t * t * t) / 38_710_000_f64);
     fit_degrees(theta)
 }
 
