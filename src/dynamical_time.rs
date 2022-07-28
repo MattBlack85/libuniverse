@@ -89,7 +89,16 @@ pub fn delta_t(date: &Date) -> f64 {
         }
         2005..=2049 => {
             let t = decimal_year - 2000_f64;
-            62.92 + 0.32217 * t + 0.005_589 * (t * t)
+
+            #[cfg(target_feature = "fma")]
+            {
+                0.005_589f64.mul_add(t * t, 0.32217f64.mul_add(t, 62.92))
+            }
+
+            #[cfg(not(target_feature = "fma"))]
+            {
+                62.92 + 0.32217 * t + 0.005_589 * (t * t)
+            }
         }
         2050..=2099 => {
             let t = (decimal_year - 1820_f64) / 100_f64;

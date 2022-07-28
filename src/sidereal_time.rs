@@ -5,9 +5,18 @@ use crate::fit_degrees;
 pub fn get_mean_sidereal_time_from_date(date: &Date) -> f64 {
     let jd = date.to_julian_day().get_value();
     let t = (&jd - 2_451_545_f64) / 36525_f64;
+
+    #[cfg(target_feature = "fma")]
+    let theta = 0.000_387_933f64.mul_add(
+        t * t,
+        360.985_647_366_29f64.mul_add(&jd - 2_451_545_f64, 280.460_618_37),
+    );
+
+    #[cfg(not(target_feature = "fma"))]
     let theta =
         280.460_618_37 + 360.985_647_366_29 * (&jd - 2_451_545_f64) + (0.000_387_933 * (t * t))
             - ((t * t * t) / 38_710_000_f64);
+
     fit_degrees(theta)
 }
 

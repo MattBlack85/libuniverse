@@ -23,6 +23,9 @@ regex = "1.6"
 [dev-dependencies]
 criterion = { version = "0.3", features = ["html_reports"] }
 
+[profile.release]
+codegen-units = 1
+
 [[bench]]
 name = "julian_day"
 harness = false
@@ -33,4 +36,8 @@ harness = false
 
 [[bench]]
 name = "dynamical_time"
+harness = false
+
+[[bench]]
+name = "sidereal_time"
 harness = false

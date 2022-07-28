@@ -10,17 +10,13 @@ pub mod transform;
 
 /// Rework a big angle so it can fit in the standard range 0-360
 fn fit_degrees(orig_angle: f64) -> f64 {
-    if (0.0..360.0).contains(&orig_angle) {
+    if (0f64..360f64).contains(&orig_angle) {
         return orig_angle;
     }
 
-    let mut final_angle: f64 = ((orig_angle / 360_f64) as i64) as f64;
+    let final_angle: f64 = (orig_angle / 360_f64).floor();
 
-    if orig_angle < 0.0 {
-        final_angle -= 1.0;
-    }
-    final_angle *= 360.0;
-    orig_angle - final_angle
+    orig_angle - final_angle * 360f64
 }
 
 /// Representation of right ascension coordinates (or RA shortly)
