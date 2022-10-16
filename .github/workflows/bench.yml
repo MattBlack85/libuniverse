@@ -18,3 +18,4 @@ jobs:
             - run: rustup toolchain update nightly && rustup default nightly
             - name: Run benchmark
               run: cd benches && rm -r output.txt && touch output.txt && cargo +nightly bench | tee output.txt
+              
