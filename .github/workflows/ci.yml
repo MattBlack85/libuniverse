@@ -15,7 +15,8 @@ jobs:
                 os: [ubuntu-latest, macos-latest, windows-latest]
         steps: 
             - uses: actions/checkout@v3
-            
+            - uses: actions-rs/toolchain@v1
+
             - uses: actions/cache@v3
             - name: Cache cargo
             - with: 
