@@ -1,0 +1,136 @@
+
+running 31 tests
+test date::test::test_date_intervals ... ignored
+test date::test::test_date_to_julian_date ... ignored
+test date::test::test_date_with_hours_format ... ignored
+test date::test::test_day_of_the_week_meeus ... ignored
+test date::test::test_day_of_the_week_online_calculator ... ignored
+test date::test::test_day_of_the_year_meeus_book ... ignored
+test dynamical_time::test::test_delta_t ... ignored
+test dynamical_time::test::test_lunar_eclipse_2022_11_08 ... ignored
+test julian_day::test::test_1600_12_31 ... ignored
+test julian_day::test::test_1999_1_1 ... ignored
+test julian_day::test::test_fractional_jd_to_calendar_date ... ignored
+test julian_day::test::test_jd_0 ... ignored
+test julian_day::test::test_jd_equality ... ignored
+test julian_day::test::test_jd_to_modified_jd ... ignored
+test julian_day::test::test_minus_1000_7_12_dot_5 ... ignored
+test julian_day::test::test_more_jd_to_calendar_date ... ignored
+test julian_day::test::test_sputnik_launch_date_to_julian_date ... ignored
+test julian_day::test::test_whole_jd_to_calendar_date ... ignored
+test sidereal_time::test::test_mean_sidereal_time_1 ... ignored
+test test::test_dec_display ... ignored
+test test::test_dms_created_correctly_from_deg ... ignored
+test test::test_eq_pos ... ignored
+test test::test_parse_dms_from_simple_str ... ignored
+test test::test_parse_ra_from_simple_str ... ignored
+test transform::tests::test_89_6078d_to89d_36m_28s ... ignored
+test transform::tests::test_dec_57_11_12 ... ignored
+test transform::tests::test_dec_min_81_7_59 ... ignored
+test transform::tests::test_deg_to_ra ... ignored
+test transform::tests::test_minus_59_1936d_to89d_36m_28s ... ignored
+test transform::tests::test_ra_23h_54m_21s ... ignored
+test transform::tests::test_ra_2h_30m_45s ... ignored
+
+test result: ok. 0 passed; 0 failed; 31 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+Gnuplot not found, using plotters backend
+Benchmarking Calculate time difference between dynamical and universal time
+Benchmarking Calculate time difference between dynamical and universal time: Warming up for 3.0000 s
+Benchmarking Calculate time difference between dynamical and universal time: Collecting 100 samples in estimated 5.0000 s (616M iterations)
+Benchmarking Calculate time difference between dynamical and universal time: Analyzing
+Calculate time difference between dynamical and universal time
+                        time:   [8.4071 ns 8.7454 ns 9.1081 ns]
+                        change: [+33.640% +36.196% +38.537%] (p = 0.00 < 0.05)
+                        Performance has regressed.
+Found 21 outliers among 100 measurements (21.00%)
+  14 (14.00%) low severe
+  1 (1.00%) low mild
+  4 (4.00%) high mild
+  2 (2.00%) high severe
+
+Gnuplot not found, using plotters backend
+Benchmarking Get JD from date
+Benchmarking Get JD from date: Warming up for 3.0000 s
+Benchmarking Get JD from date: Collecting 100 samples in estimated 5.0000 s (1.5B iterations)
+Benchmarking Get JD from date: Analyzing
+Get JD from date        time:   [3.3803 ns 3.4042 ns 3.4326 ns]
+                        change: [+0.3180% +0.7671% +1.2380%] (p = 0.00 < 0.05)
+                        Change within noise threshold.
+Found 11 outliers among 100 measurements (11.00%)
+  2 (2.00%) high mild
+  9 (9.00%) high severe
+
+Gnuplot not found, using plotters backend
+Benchmarking Calculate the mean sidereal time for a given date
+Benchmarking Calculate the mean sidereal time for a given date: Warming up for 3.0000 s
+Benchmarking Calculate the mean sidereal time for a given date: Collecting 100 samples in estimated 5.0000 s (300M iterations)
+Benchmarking Calculate the mean sidereal time for a given date: Analyzing
+Calculate the mean sidereal time for a given date
+                        time:   [16.669 ns 16.688 ns 16.711 ns]
+                        change: [+0.1513% +0.2181% +0.3012%] (p = 0.00 < 0.05)
+                        Change within noise threshold.
+Found 13 outliers among 100 measurements (13.00%)
+  11 (11.00%) high mild
+  2 (2.00%) high severe
+
+Gnuplot not found, using plotters backend
+Benchmarking Transform RA to degrees (positive angle)
+Benchmarking Transform RA to degrees (positive angle): Warming up for 3.0000 s
+Benchmarking Transform RA to degrees (positive angle): Collecting 100 samples in estimated 5.0000 s (633M iterations)
+Benchmarking Transform RA to degrees (positive angle): Analyzing
+Transform RA to degrees (positive angle)
+                        time:   [7.8897 ns 7.9047 ns 7.9189 ns]
+                        change: [+0.4712% +0.7168% +0.9557%] (p = 0.00 < 0.05)
+                        Change within noise threshold.
+Found 6 outliers among 100 measurements (6.00%)
+  6 (6.00%) low mild
+
+Benchmarking Transform RA to degrees (negative angle)
+Benchmarking Transform RA to degrees (negative angle): Warming up for 3.0000 s
+Benchmarking Transform RA to degrees (negative angle): Collecting 100 samples in estimated 5.0000 s (625M iterations)
+Benchmarking Transform RA to degrees (negative angle): Analyzing
+Transform RA to degrees (negative angle)
+                        time:   [7.8593 ns 7.9053 ns 7.9588 ns]
+                        change: [+0.1931% +0.5725% +0.9957%] (p = 0.01 < 0.05)
+                        Change within noise threshold.
+Found 7 outliers among 100 measurements (7.00%)
+  5 (5.00%) high mild
+  2 (2.00%) high severe
+
+Benchmarking Transform negative angle degrees to dd:mm:ss
+Benchmarking Transform negative angle degrees to dd:mm:ss: Warming up for 3.0000 s
+Benchmarking Transform negative angle degrees to dd:mm:ss: Collecting 100 samples in estimated 5.0000 s (651M iterations)
+Benchmarking Transform negative angle degrees to dd:mm:ss: Analyzing
+Transform negative angle degrees to dd:mm:ss
+                        time:   [7.6958 ns 7.7058 ns 7.7162 ns]
+                        change: [+0.1919% +0.3069% +0.4217%] (p = 0.00 < 0.05)
+                        Change within noise threshold.
+Found 4 outliers among 100 measurements (4.00%)
+  3 (3.00%) high mild
+  1 (1.00%) high severe
+
+Benchmarking Transform positive angle degrees to dd:mm:ss
+Benchmarking Transform positive angle degrees to dd:mm:ss: Warming up for 3.0000 s
+Benchmarking Transform positive angle degrees to dd:mm:ss: Collecting 100 samples in estimated 5.0000 s (650M iterations)
+Benchmarking Transform positive angle degrees to dd:mm:ss: Analyzing
+Transform positive angle degrees to dd:mm:ss
+                        time:   [7.6672 ns 7.6683 ns 7.6695 ns]
+                        change: [-0.0025% +0.0419% +0.0750%] (p = 0.03 < 0.05)
+                        Change within noise threshold.
+Found 5 outliers among 100 measurements (5.00%)
+  2 (2.00%) high mild
+  3 (3.00%) high severe
+
+Benchmarking Transform an angle to a `HoursMinSec` type
+Benchmarking Transform an angle to a `HoursMinSec` type: Warming up for 3.0000 s
+Benchmarking Transform an angle to a `HoursMinSec` type: Collecting 100 samples in estimated 5.0000 s (1.5B iterations)
+Benchmarking Transform an angle to a `HoursMinSec` type: Analyzing
+Transform an angle to a `HoursMinSec` type
+                        time:   [3.4295 ns 3.4410 ns 3.4526 ns]
+                        change: [+0.1019% +0.5562% +0.9852%] (p = 0.01 < 0.05)
+                        Change within noise threshold.
+Found 12 outliers among 100 measurements (12.00%)
+  8 (8.00%) high mild
+  4 (4.00%) high severe
+
