@@ -13,29 +13,28 @@ jobs:
         strategy:
             matrix:
                 os: [ubuntu-latest, macos-latest, windows-latest]
-
-    steps:
-        - uses: actions/checkout@v3
-
-        - uses: actions/cache@v3
-          name: Cache cargo
-          with:
-              path: |
-                  ~/.cargo/bin/
-                  ~/.cargo/registry/index/
-                  ~/.cargo/registry/cache/
-                  ~/.cargo/git/db/
-                  target
-              key: ${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
-
-        - name: Build
-          run: cargo build --verbose
-
+        steps: 
+            - uses: actions/checkout@v3
+            
+            - uses: actions/cache@v3
+            - name: Cache cargo
+            - with: 
+                path : | 
+                    ~/.cargo/bin/
+                    ~/.cargo/registry/index/
+                    ~/.cargo/registry/cache/
+                    ~/.cargo/git/db/
+                    target
+                keys: ${{ runner.os }}-${{ hashFiles('Cargo.lock') }}
+            
+            - name: Build
+              run: cargo build --verbose
+                
     check:
         name: Check
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
             - uses: actions-rs/toolchain@v1
               with:
                   profile: minimal
@@ -49,7 +48,7 @@ jobs:
         name: Rustfmt
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
             - uses: actions-rs/toolchain@v1
               with:
                   profile: minimal
@@ -65,7 +64,7 @@ jobs:
         name: Clippy
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
             - uses: actions-rs/toolchain@v1
               with:
                   toolchain: stable
