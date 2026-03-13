@@ -6,6 +6,7 @@ pub mod date;
 pub mod dynamical_time;
 pub mod julian_day;
 pub mod moon;
+pub mod nutation;
 pub mod sidereal_time;
 pub mod transform;
 
