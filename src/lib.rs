@@ -2,6 +2,7 @@ use std::fmt::{Display, Formatter, Result};
 
 use regex::Regex;
 
+pub mod aberration;
 pub mod date;
 pub mod dynamical_time;
 pub mod julian_day;
