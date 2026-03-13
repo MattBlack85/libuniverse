@@ -10,6 +10,7 @@ implementation priority (foundational algorithms first).
 
 - [ ] = not started
 - [~] = partially implemented (notes inline)
+- [x] = done
 
 ---
 
@@ -52,7 +53,7 @@ implementation priority (foundational algorithms first).
 
 | Status | libnova function | Description |
 |--------|-----------------|-------------|
-| [ ] | `ln_get_nutation` | Nutation in longitude (Δψ) and obliquity (Δε) from JDE — Meeus ch. 22 |
+| [x] | `ln_get_nutation` | Nutation in longitude (Δψ) and obliquity (Δε) from JDE — Meeus ch. 22 |
 
 ---
 
