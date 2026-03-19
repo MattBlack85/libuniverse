@@ -96,15 +96,47 @@ static TABLE_22A: &[(i8, i8, i8, i8, i8, i32, f64, i32, f64)] = &[
 pub fn get_nutation(jd: &JulianDay) -> Nutation {
     // Julian centuries from J2000.0 — eq. 22.1
     let t = (jd.get_value() - 2_451_545.0) / 36_525.0;
+    // t2 and t3 are only used in the non-FMA fallback path for the fundamental arguments.
+    #[cfg(not(any(target_feature = "fma", target_arch = "aarch64")))]
     let t2 = t * t;
-    let t3 = t2 * t;
 
-    // Fundamental arguments in degrees — eqs. 22.2–22.6
-    let d = 297.850_36 + 445_267.111_480 * t - 0.001_914_2 * t2 + t3 / 189_474.0;
-    let m = 357.527_72 + 35_999.050_340 * t - 0.000_160_3 * t2 - t3 / 300_000.0;
-    let mp = 134.962_98 + 477_198.867_398 * t + 0.008_697_2 * t2 + t3 / 56_250.0;
-    let f = 93.271_91 + 483_202.017_538 * t - 0.003_682_5 * t2 + t3 / 327_270.0;
-    let omega = 125.044_52 - 1_934.136_261 * t + 0.002_070_8 * t2 + t3 / 450_000.0;
+    // Fundamental arguments (eqs. 22.2–22.6) are cubic polynomials in T.
+    // Horner's method with FMA reduces each from 3 mul + 3 add to 3 FMAs.
+    // On AArch64 FMADD is part of the base ISA; on x86_64 it requires +fma.
+    #[cfg(any(target_feature = "fma", target_arch = "aarch64"))]
+    let (d, m, mp, f, omega) = {
+        let d = (1.0_f64 / 189_474.0)
+            .mul_add(t, -0.001_914_2)
+            .mul_add(t, 445_267.111_480)
+            .mul_add(t, 297.850_36);
+        let m = (-1.0_f64 / 300_000.0)
+            .mul_add(t, -0.000_160_3)
+            .mul_add(t, 35_999.050_340)
+            .mul_add(t, 357.527_72);
+        let mp = (1.0_f64 / 56_250.0)
+            .mul_add(t, 0.008_697_2)
+            .mul_add(t, 477_198.867_398)
+            .mul_add(t, 134.962_98);
+        let f = (1.0_f64 / 327_270.0)
+            .mul_add(t, -0.003_682_5)
+            .mul_add(t, 483_202.017_538)
+            .mul_add(t, 93.271_91);
+        let omega = (1.0_f64 / 450_000.0)
+            .mul_add(t, 0.002_070_8)
+            .mul_add(t, -1_934.136_261)
+            .mul_add(t, 125.044_52);
+        (d, m, mp, f, omega)
+    };
+    #[cfg(not(any(target_feature = "fma", target_arch = "aarch64")))]
+    let t3 = t2 * t;
+    #[cfg(not(any(target_feature = "fma", target_arch = "aarch64")))]
+    let (d, m, mp, f, omega) = (
+        297.850_36 + 445_267.111_480 * t - 0.001_914_2 * t2 + t3 / 189_474.0,
+        357.527_72 + 35_999.050_340 * t - 0.000_160_3 * t2 - t3 / 300_000.0,
+        134.962_98 + 477_198.867_398 * t + 0.008_697_2 * t2 + t3 / 56_250.0,
+        93.271_91 + 483_202.017_538 * t - 0.003_682_5 * t2 + t3 / 327_270.0,
+        125.044_52 - 1_934.136_261 * t + 0.002_070_8 * t2 + t3 / 450_000.0,
+    );
 
     let d = d.to_radians();
     let m = m.to_radians();

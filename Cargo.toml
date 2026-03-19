@@ -25,6 +25,8 @@ criterion = { version = "0.3", features = ["html_reports"] }
 
 [profile.release]
 codegen-units = 1
+lto = true
+opt-level = 3
 
 [[bench]]
 name = "julian_day"

@@ -1,9 +1,16 @@
 use crate::{DegMinSec, RightAscension};
 
+// 15° per hour; 1° = 1/240 hour expressed in degrees → 15/3600
+const DEG_PER_HOUR: f64 = 15.0;
+const INV_240: f64 = 15.0 / 3600.0; // = 1/240
+
 #[must_use]
 pub fn ra_to_deg(ra: &RightAscension) -> f64 {
-    let mut deg =
-        (f64::from(ra.hours) + f64::from(ra.minutes) / 60_f64 + ra.seconds / 3600_f64) * 15_f64;
+    // Accumulate total arcseconds then scale once: avoids two divisions (/60, /3600).
+    let mut deg = (f64::from(ra.hours) * 3600.0
+        + f64::from(ra.minutes) * 60.0
+        + ra.seconds)
+        * INV_240;
 
     if deg > 180.0 {
         deg -= 360.0;
@@ -13,23 +20,29 @@ pub fn ra_to_deg(ra: &RightAscension) -> f64 {
 
 #[must_use]
 pub fn deg_to_ra(deg: f64) -> RightAscension {
-    let hours = (deg / 15_f64) as u8;
-    let minutes = ((deg - f64::from(hours * 15)) * 4_f64) as u8;
-    let secs = (deg - f64::from(hours * 15) - (f64::from(minutes) / 4_f64)) * 240_f64;
+    let hours = (deg / DEG_PER_HOUR) as u8;
+    // Cache the degree-equivalent of the whole hours to avoid recomputing it.
+    let remainder = deg - f64::from(hours) * DEG_PER_HOUR;
+    let minutes = (remainder * 4.0) as u8;
+    // Replace /4 with *0.25 (exact representation) to avoid a division.
+    let secs = (remainder - f64::from(minutes) * 0.25) * 240.0;
 
     RightAscension::new(hours, minutes, secs)
 }
 
 #[must_use]
 pub fn dec_to_deg(dec: &DegMinSec) -> f64 {
-    let mut degrees =
-        f64::from(dec.degrees) + f64::from(dec.minutes) / 60_f64 + dec.seconds as f64 / 3600_f64;
+    // Accumulate total arcseconds then scale once: avoids two divisions (/60, /3600).
+    let degrees = (f64::from(dec.degrees) * 3600.0
+        + f64::from(dec.minutes) * 60.0
+        + dec.seconds)
+        * (1.0 / 3600.0);
 
     if dec.negative {
-        degrees *= -1.0;
+        -degrees
+    } else {
+        degrees
     }
-
-    degrees
 }
 
 /// Utility to go easily from a decimal degree to a Degree-minutes

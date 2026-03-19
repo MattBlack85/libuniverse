@@ -1,3 +1,13 @@
 [build]
 [target.'cfg(target_arch = "x86_64")']
 rustflags = ["-Ctarget-feature=+fma,+avx2"]
+
+# Raspberry Pi 4/5 (AArch64): NEON is mandatory in the base ISA; enabling it
+# here lets rustc emit vectorised code and unlocks FMADD/FMSUB for f64::mul_add.
+[target.'cfg(target_arch = "aarch64")']
+rustflags = ["-Ctarget-feature=+neon,+fp-armv8"]
+
+# Raspberry Pi 2/3 (ARMv7): enable NEON and VFPv4 (which includes fused
+# multiply-accumulate for single- and double-precision floats).
+[target.'cfg(all(target_arch = "arm", target_feature = "v7"))']
+rustflags = ["-Ctarget-feature=+neon,+vfp4,+thumb2"]

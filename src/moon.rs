@@ -169,36 +169,95 @@ pub fn get_moon_position(jd: &JulianDay) -> MoonPosition {
 
     // Julian centuries from J2000.0 (Meeus eq. 47.1)
     let t = (jd.get_value() - 2_451_545.0) / 36_525.0;
+    // t2 and t3 are only needed for the non-FMA fallback paths of `e` and `epsilon`.
+    #[cfg(not(any(target_feature = "fma", target_arch = "aarch64")))]
     let t2 = t * t;
+    #[cfg(not(any(target_feature = "fma", target_arch = "aarch64")))]
     let t3 = t2 * t;
-    let t4 = t3 * t;
+
+    // The five fundamental arguments (Meeus eqs. 47.1–47.5) are degree-4
+    // polynomials in T.  We evaluate them with Horner's method on FMA-capable
+    // targets (x86_64 +fma, AArch64 base ISA) to reduce the operation count
+    // from 8 mul+add to 4 fused multiply-add instructions per argument.
+    // On non-FMA targets the Horner form without FMA is still used since it
+    // has the same operation count as the direct form but better numerical
+    // stability and no need for the precomputed t4 value.
 
     // Moon's mean longitude L' (degrees), Meeus eq. 47.1
+    #[cfg(any(target_feature = "fma", target_arch = "aarch64"))]
     let lp = fit_degrees(
-        218.316_447_7 + 481_267.881_234_21 * t - 0.001_578_6 * t2 + t3 / 538_841.0
-            - t4 / 65_194_000.0,
+        (-1.0_f64 / 65_194_000.0)
+            .mul_add(t, 1.0 / 538_841.0)
+            .mul_add(t, -0.001_578_6)
+            .mul_add(t, 481_267.881_234_21)
+            .mul_add(t, 218.316_447_7),
+    );
+    #[cfg(not(any(target_feature = "fma", target_arch = "aarch64")))]
+    let lp = fit_degrees(
+        ((((-1.0 / 65_194_000.0 * t + 1.0 / 538_841.0) * t - 0.001_578_6) * t
+            + 481_267.881_234_21) * t
+            + 218.316_447_7),
     );
 
     // Moon's mean elongation D (degrees), Meeus eq. 47.2
+    #[cfg(any(target_feature = "fma", target_arch = "aarch64"))]
     let d = fit_degrees(
-        297.850_192_1 + 445_267.111_403_4 * t - 0.001_881_9 * t2 + t3 / 545_868.0
-            - t4 / 113_065_000.0,
+        (-1.0_f64 / 113_065_000.0)
+            .mul_add(t, 1.0 / 545_868.0)
+            .mul_add(t, -0.001_881_9)
+            .mul_add(t, 445_267.111_403_4)
+            .mul_add(t, 297.850_192_1),
+    );
+    #[cfg(not(any(target_feature = "fma", target_arch = "aarch64")))]
+    let d = fit_degrees(
+        ((((-1.0 / 113_065_000.0 * t + 1.0 / 545_868.0) * t - 0.001_881_9) * t
+            + 445_267.111_403_4) * t
+            + 297.850_192_1),
     );
 
     // Sun's mean anomaly M (degrees), Meeus eq. 47.3
-    let m =
-        fit_degrees(357.529_109_2 + 35_999.050_290_9 * t - 0.000_153_6 * t2 + t3 / 24_490_000.0);
+    #[cfg(any(target_feature = "fma", target_arch = "aarch64"))]
+    let m = fit_degrees(
+        (1.0_f64 / 24_490_000.0)
+            .mul_add(t, -0.000_153_6)
+            .mul_add(t, 35_999.050_290_9)
+            .mul_add(t, 357.529_109_2),
+    );
+    #[cfg(not(any(target_feature = "fma", target_arch = "aarch64")))]
+    let m = fit_degrees(
+        (((1.0 / 24_490_000.0 * t - 0.000_153_6) * t + 35_999.050_290_9) * t + 357.529_109_2),
+    );
 
     // Moon's mean anomaly M' (degrees), Meeus eq. 47.4
+    #[cfg(any(target_feature = "fma", target_arch = "aarch64"))]
     let mp = fit_degrees(
-        134.963_396_4 + 477_198.867_505_5 * t + 0.008_741_4 * t2 + t3 / 69_699.0
-            - t4 / 14_712_000.0,
+        (-1.0_f64 / 14_712_000.0)
+            .mul_add(t, 1.0 / 69_699.0)
+            .mul_add(t, 0.008_741_4)
+            .mul_add(t, 477_198.867_505_5)
+            .mul_add(t, 134.963_396_4),
+    );
+    #[cfg(not(any(target_feature = "fma", target_arch = "aarch64")))]
+    let mp = fit_degrees(
+        ((((-1.0 / 14_712_000.0 * t + 1.0 / 69_699.0) * t + 0.008_741_4) * t
+            + 477_198.867_505_5) * t
+            + 134.963_396_4),
     );
 
     // Moon's argument of latitude F (degrees), Meeus eq. 47.5
+    #[cfg(any(target_feature = "fma", target_arch = "aarch64"))]
     let f = fit_degrees(
-        93.272_095_0 + 483_202.017_523_3 * t - 0.003_653_9 * t2 - t3 / 3_526_000.0
-            + t4 / 863_310_000.0,
+        (1.0_f64 / 863_310_000.0)
+            .mul_add(t, -1.0 / 3_526_000.0)
+            .mul_add(t, -0.003_653_9)
+            .mul_add(t, 483_202.017_523_3)
+            .mul_add(t, 93.272_095_0),
+    );
+    #[cfg(not(any(target_feature = "fma", target_arch = "aarch64")))]
+    let f = fit_degrees(
+        ((((1.0 / 863_310_000.0 * t - 1.0 / 3_526_000.0) * t - 0.003_653_9) * t
+            + 483_202.017_523_3) * t
+            + 93.272_095_0),
     );
 
     // Perturbation arguments from Venus and Jupiter (Meeus p. 338)
@@ -207,6 +266,10 @@ pub fn get_moon_position(jd: &JulianDay) -> MoonPosition {
     let a3 = fit_degrees(313.45 + 481_266.484 * t);
 
     // Eccentricity correction for Sun's mean anomaly M (Meeus eq. 47.6)
+    // e = 1 - 0.002516*T - 0.0000074*T² — Horner form on FMA targets
+    #[cfg(any(target_feature = "fma", target_arch = "aarch64"))]
+    let e = (-0.000_007_4_f64).mul_add(t, -0.002_516).mul_add(t, 1.0);
+    #[cfg(not(any(target_feature = "fma", target_arch = "aarch64")))]
     let e = 1.0 - 0.002_516 * t - 0.000_007_4 * t2;
     let e2 = e * e;
 
@@ -281,6 +344,18 @@ pub fn get_moon_position(jd: &JulianDay) -> MoonPosition {
     //
     // Mean obliquity of the ecliptic ε (Meeus Ch. 22, eq. 22.2, low-precision form):
     //   ε = 23°26'21.448" − 46.8150"·T − 0.00059"·T² + 0.001813"·T³
+    // Constant term pre-evaluated: 23 + 26/60 + 21.448/3600 = 23.439_291_111...°
+    // Polynomial coefficients (all divided by 3600 to convert arcsec → degrees):
+    //   a1 = -46.8150/3600, a2 = -0.00059/3600, a3 = +0.001813/3600
+    #[cfg(any(target_feature = "fma", target_arch = "aarch64"))]
+    let epsilon = {
+        (0.001_813_f64 / 3_600.0)
+            .mul_add(t, -0.000_59 / 3_600.0)
+            .mul_add(t, -46.815_0 / 3_600.0)
+            .mul_add(t, 23.439_291_111_111)
+            * to_rad
+    };
+    #[cfg(not(any(target_feature = "fma", target_arch = "aarch64")))]
     let epsilon = (23.0 + 26.0 / 60.0 + 21.448 / 3_600.0
         - (46.815_0 / 3_600.0) * t
         - (0.000_59 / 3_600.0) * t2
