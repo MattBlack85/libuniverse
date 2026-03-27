@@ -1,6 +1,5 @@
 use crate::date::Date;
 use crate::fit_degrees;
-use crate::nutation;
 
 #[must_use]
 pub fn get_mean_sidereal_time_from_date(date: &Date) -> f64 {
@@ -30,28 +29,41 @@ fn mean_obliquity(t: f64) -> f64 {
     23.439_291_111 - 0.013_004_167 * t - 1.638_9e-7 * t2 + 5.036_1e-7 * t3
 }
 
+/// Equation of the equinoxes (Δψ cos ε₀) in degrees, using the 4-term
+/// approximation from Meeus, *Astronomical Algorithms*, 2nd ed., p. 88.
+///
+/// Accurate to ~0.5 arcsecond (~0.03 s of time), which is sufficient for
+/// apparent sidereal time. Replaces the full 63-term IAU 1980 nutation series
+/// with 4 sin evaluations and 1 cos evaluation.
+fn equation_of_equinoxes(t: f64) -> f64 {
+    // Ascending node of the Moon's mean orbit (Meeus p. 144, eq. 22.6)
+    let omega = (125.044_52 - 1_934.136_261 * t).to_radians();
+    // Mean longitude of the Sun
+    let l_sun = (280.466_5 + 36_000.769_8 * t).to_radians();
+    // Mean longitude of the Moon
+    let l_moon = (218.316_5 + 481_267.881_3 * t).to_radians();
+
+    // Principal terms of Δψ in arcseconds
+    let delta_psi = -17.20 * omega.sin() - 1.32 * (2.0 * l_sun).sin() - 0.23 * (2.0 * l_moon).sin()
+        + 0.21 * (2.0 * omega).sin();
+
+    // Equation of equinoxes: Δψ cos ε₀, from arcseconds to degrees
+    delta_psi * mean_obliquity(t).to_radians().cos() / 3_600.0
+}
+
 /// Apparent sidereal time for the given date, in degrees.
 ///
 /// Apparent sidereal time equals mean sidereal time plus the equation of the
-/// equinoxes (Δψ cos ε), where Δψ is nutation in longitude and ε is the true
-/// obliquity of the ecliptic.
-///
+/// equinoxes (Δψ cos ε₀), computed via the 4-term approximation from
 /// Meeus, *Astronomical Algorithms*, 2nd ed., Chapter 12, p. 87–88.
 #[must_use]
 pub fn get_apparent_sidereal_time_from_date(date: &Date) -> f64 {
-    let jd = date.to_julian_day();
-    let t = (jd.get_value() - 2_451_545_f64) / 36_525_f64;
+    let jd = date.to_julian_day().get_value();
+    let t = (jd - 2_451_545_f64) / 36_525_f64;
 
     let mean_st = get_mean_sidereal_time_from_date(date);
-    let nut = nutation::get_nutation(&jd);
 
-    // True obliquity in degrees (Δε in arcseconds → degrees)
-    let eps = mean_obliquity(t) + nut.delta_eps / 3_600.0;
-
-    // Equation of the equinoxes in degrees (Δψ in arcseconds → degrees)
-    let eq_of_equinoxes = nut.delta_psi * eps.to_radians().cos() / 3_600.0;
-
-    fit_degrees(mean_st + eq_of_equinoxes)
+    fit_degrees(mean_st + equation_of_equinoxes(t))
 }
 
 #[cfg(test)]
