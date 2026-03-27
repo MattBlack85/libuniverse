@@ -1,5 +1,6 @@
 use crate::date::Date;
 use crate::fit_degrees;
+use crate::nutation;
 
 #[must_use]
 pub fn get_mean_sidereal_time_from_date(date: &Date) -> f64 {
@@ -20,10 +21,45 @@ pub fn get_mean_sidereal_time_from_date(date: &Date) -> f64 {
     fit_degrees(theta)
 }
 
+/// Mean obliquity of the ecliptic in degrees.
+///
+/// Meeus, *Astronomical Algorithms*, 2nd ed., Eq. 22.2, p. 147.
+fn mean_obliquity(t: f64) -> f64 {
+    let t2 = t * t;
+    let t3 = t2 * t;
+    23.439_291_111 - 0.013_004_167 * t - 1.638_9e-7 * t2 + 5.036_1e-7 * t3
+}
+
+/// Apparent sidereal time for the given date, in degrees.
+///
+/// Apparent sidereal time equals mean sidereal time plus the equation of the
+/// equinoxes (Δψ cos ε), where Δψ is nutation in longitude and ε is the true
+/// obliquity of the ecliptic.
+///
+/// Meeus, *Astronomical Algorithms*, 2nd ed., Chapter 12, p. 87–88.
+#[must_use]
+pub fn get_apparent_sidereal_time_from_date(date: &Date) -> f64 {
+    let jd = date.to_julian_day();
+    let t = (jd.get_value() - 2_451_545_f64) / 36_525_f64;
+
+    let mean_st = get_mean_sidereal_time_from_date(date);
+    let nut = nutation::get_nutation(&jd);
+
+    // True obliquity in degrees (Δε in arcseconds → degrees)
+    let eps = mean_obliquity(t) + nut.delta_eps / 3_600.0;
+
+    // Equation of the equinoxes in degrees (Δψ in arcseconds → degrees)
+    let eq_of_equinoxes = nut.delta_psi * eps.to_radians().cos() / 3_600.0;
+
+    fit_degrees(mean_st + eq_of_equinoxes)
+}
+
 #[cfg(test)]
 mod test {
     use crate::date::Date;
-    use crate::sidereal_time::get_mean_sidereal_time_from_date;
+    use crate::sidereal_time::{
+        get_apparent_sidereal_time_from_date, get_mean_sidereal_time_from_date,
+    };
     use crate::RightAscension;
 
     #[test]
@@ -34,6 +70,20 @@ mod test {
         let expected_ra = RightAscension::new(13, 10, 46.3668);
 
         assert_eq!(RightAscension::from_degrees(mst), expected_ra);
+    }
+
+    #[test]
+    fn test_apparent_sidereal_time_1() {
+        // Example 12.a p.88 from Meeus, Astronomical Algorithms, 2nd ed.
+        // 1987 April 10, 0h UT — apparent sidereal time = 13h 10m 46.1351s
+        let date = Date::new(1987, 4, 10.0);
+        let ast = get_apparent_sidereal_time_from_date(&date);
+        // Expected in degrees: (13 + 10/60 + 46.1351/3600) * 15
+        let expected = (13.0 + 10.0 / 60.0 + 46.1351 / 3600.0) * 15.0;
+        assert!(
+            (ast - expected).abs() < 1e-4,
+            "apparent sidereal time = {ast:.6}°, expected ≈ {expected:.6}°"
+        );
     }
 
     // #[test]
