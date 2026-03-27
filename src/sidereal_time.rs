@@ -1,5 +1,6 @@
 use crate::date::Date;
 use crate::fit_degrees;
+use crate::nutation;
 
 #[must_use]
 pub fn get_mean_sidereal_time_from_date(date: &Date) -> f64 {
@@ -29,41 +30,27 @@ fn mean_obliquity(t: f64) -> f64 {
     23.439_291_111 - 0.013_004_167 * t - 1.638_9e-7 * t2 + 5.036_1e-7 * t3
 }
 
-/// Equation of the equinoxes (Δψ cos ε₀) in degrees, using the 4-term
-/// approximation from Meeus, *Astronomical Algorithms*, 2nd ed., p. 88.
-///
-/// Accurate to ~0.5 arcsecond (~0.03 s of time), which is sufficient for
-/// apparent sidereal time. Replaces the full 63-term IAU 1980 nutation series
-/// with 4 sin evaluations and 1 cos evaluation.
-fn equation_of_equinoxes(t: f64) -> f64 {
-    // Ascending node of the Moon's mean orbit (Meeus p. 144, eq. 22.6)
-    let omega = (125.044_52 - 1_934.136_261 * t).to_radians();
-    // Mean longitude of the Sun
-    let l_sun = (280.466_5 + 36_000.769_8 * t).to_radians();
-    // Mean longitude of the Moon
-    let l_moon = (218.316_5 + 481_267.881_3 * t).to_radians();
-
-    // Principal terms of Δψ in arcseconds
-    let delta_psi = -17.20 * omega.sin() - 1.32 * (2.0 * l_sun).sin() - 0.23 * (2.0 * l_moon).sin()
-        + 0.21 * (2.0 * omega).sin();
-
-    // Equation of equinoxes: Δψ cos ε₀, from arcseconds to degrees
-    delta_psi * mean_obliquity(t).to_radians().cos() / 3_600.0
-}
-
 /// Apparent sidereal time for the given date, in degrees.
 ///
 /// Apparent sidereal time equals mean sidereal time plus the equation of the
-/// equinoxes (Δψ cos ε₀), computed via the 4-term approximation from
+/// equinoxes (Δψ cos ε₀), where Δψ is the full 63-term IAU 1980 nutation in
+/// longitude computed via [`nutation::get_delta_psi`] — which skips the unused
+/// Δε/cosine accumulation and batches arithmetic with AVX2 FMA where available.
+///
+/// Using mean obliquity ε₀ instead of true ε introduces < 0.02″ error in the
+/// equation of the equinoxes — negligible for sidereal time purposes.
+///
 /// Meeus, *Astronomical Algorithms*, 2nd ed., Chapter 12, p. 87–88.
 #[must_use]
 pub fn get_apparent_sidereal_time_from_date(date: &Date) -> f64 {
-    let jd = date.to_julian_day().get_value();
-    let t = (jd - 2_451_545_f64) / 36_525_f64;
+    let jd = date.to_julian_day();
+    let t = (jd.get_value() - 2_451_545_f64) / 36_525_f64;
 
     let mean_st = get_mean_sidereal_time_from_date(date);
+    let delta_psi = nutation::get_delta_psi(&jd);
+    let eq_of_equinoxes = delta_psi * mean_obliquity(t).to_radians().cos() / 3_600.0;
 
-    fit_degrees(mean_st + equation_of_equinoxes(t))
+    fit_degrees(mean_st + eq_of_equinoxes)
 }
 
 #[cfg(test)]
