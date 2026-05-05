@@ -1,7 +1,7 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
 
-use runiverse::transform::{deg_to_dms, deg_to_ra, ra_to_deg};
 use runiverse::RightAscension;
+use runiverse::transform::{deg_to_dms, deg_to_ra, ra_to_deg};
 
 fn ra_to_deg_positive_angle(c: &mut Criterion) {
     let ra = black_box(RightAscension::new(4, 55, 45.0));
