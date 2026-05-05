@@ -11,14 +11,12 @@ pub mod sidereal_time;
 pub mod transform;
 
 /// Rework a big angle so it can fit in the standard range 0-360
-fn fit_degrees(orig_angle: f64) -> f64 {
-    if (0f64..360f64).contains(&orig_angle) {
-        return orig_angle;
+pub fn fit_degrees(orig_angle: f64) -> f64 {
+    let mut a = orig_angle % 360.0;
+    if a < 0.0 {
+        a += 360.0;
     }
-
-    let final_angle: f64 = (orig_angle / 360_f64).floor();
-
-    orig_angle - final_angle * 360f64
+    a
 }
 
 /// Representation of right ascension coordinates (or RA shortly)
@@ -198,7 +196,7 @@ pub struct LongLatPosition {
 
 #[cfg(test)]
 mod test {
-    use crate::{Declination, EqPosition, RightAscension};
+    use crate::{Declination, EqPosition, RightAscension, fit_degrees};
 
     #[test]
     fn test_dec_display() {
@@ -234,5 +232,27 @@ mod test {
         assert_eq!(eq_pos.ra, ra);
         assert_eq!(eq_pos.dec, dec);
         assert_eq!(format!("{}", eq_pos), "ra:23h 44m 1s dec:-28° 9' 44.08''");
+    }
+
+    #[test]
+    fn test_small_negative_angle() {
+        let a = fit_degrees(-0.0000000001);
+        assert!((a - 360.0).abs() < 0.00000001f64);
+    }
+
+    #[test]
+    fn test_just_bigger_than_360_angle() {
+        let a = fit_degrees(360.0000000001);
+        assert!((a - 0.0).abs() < 0.00001f64);
+    }
+
+    #[test]
+    fn test_angle_normalization_invariant() {
+        let inputs = [360.0000000001, 720.0, -0.0000000001, -360.0, 1080.5];
+
+        for x in inputs {
+            let a = fit_degrees(x);
+            assert!(a >= 0.0 && a < 360.0);
+        }
     }
 }
