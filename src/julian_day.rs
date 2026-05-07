@@ -48,21 +48,9 @@ impl JulianDay {
 
         let day: f64 = f64::from(b - d - (30.6001_f64 * f64::from(e)) as i32) + f;
 
-        let month: u8 = {
-            if e < 14 {
-                e - 1
-            } else {
-                e - 13
-            }
-        };
+        let month: u8 = { if e < 14 { e - 1 } else { e - 13 } };
 
-        let year: i16 = {
-            if month > 2 {
-                c - 4716
-            } else {
-                c - 4715
-            }
-        };
+        let year: i16 = { if month > 2 { c - 4716 } else { c - 4715 } };
 
         Date::new(year, month, day)
     }
@@ -103,7 +91,7 @@ pub fn get_julian_day(date: &Date) -> f64 {
 #[cfg(test)]
 mod test {
     use crate::date::Date;
-    use crate::julian_day::{get_julian_day, JulianDay};
+    use crate::julian_day::{JulianDay, get_julian_day};
 
     #[test]
     fn test_sputnik_launch_date_to_julian_date() {

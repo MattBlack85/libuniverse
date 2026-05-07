@@ -7,18 +7,17 @@ pub mod date;
 pub mod dynamical_time;
 pub mod julian_day;
 pub mod moon;
+pub mod nutation;
 pub mod sidereal_time;
 pub mod transform;
 
 /// Rework a big angle so it can fit in the standard range 0-360
-fn fit_degrees(orig_angle: f64) -> f64 {
-    if (0f64..360f64).contains(&orig_angle) {
-        return orig_angle;
+pub fn fit_degrees(orig_angle: f64) -> f64 {
+    let mut a = orig_angle % 360.0;
+    if a < 0.0 {
+        a += 360.0;
     }
-
-    let final_angle: f64 = (orig_angle / 360_f64).floor();
-
-    orig_angle - final_angle * 360f64
+    a
 }
 
 /// Representation of right ascension coordinates (or RA shortly)
@@ -171,26 +170,6 @@ impl Eq for DegMinSec {}
 pub type Declination = DegMinSec;
 pub type RightAscension = HoursMinSec;
 
-struct EqPosition {
-    ra: RightAscension,
-    dec: Declination,
-}
-
-impl EqPosition {
-    pub fn from_string(ra: &str, dec: &str) -> Self {
-        Self {
-            ra: RightAscension::from_string(ra),
-            dec: Declination::from_string(dec),
-        }
-    }
-}
-
-impl Display for EqPosition {
-    fn fmt(&self, f: &mut Formatter) -> Result {
-        write!(f, "ra:{} dec:{}", self.ra, self.dec)
-    }
-}
-
 pub struct LongLatPosition {
     pub long: DegMinSec,
     pub lat: DegMinSec,
@@ -198,7 +177,7 @@ pub struct LongLatPosition {
 
 #[cfg(test)]
 mod test {
-    use crate::{Declination, EqPosition, RightAscension};
+    use crate::{Declination, RightAscension, fit_degrees};
 
     #[test]
     fn test_dec_display() {
@@ -227,12 +206,24 @@ mod test {
     }
 
     #[test]
-    fn test_eq_pos() {
-        let ra = RightAscension::new(23, 44, 01.0);
-        let dec = Declination::new(-28, 9, 44.08);
-        let eq_pos = EqPosition::from_string("23 44 01", "-28 09 44.08");
-        assert_eq!(eq_pos.ra, ra);
-        assert_eq!(eq_pos.dec, dec);
-        assert_eq!(format!("{}", eq_pos), "ra:23h 44m 1s dec:-28° 9' 44.08''");
+    fn test_small_negative_angle() {
+        let a = fit_degrees(-0.0000000001);
+        assert!((a - 360.0).abs() < 0.00000001f64);
+    }
+
+    #[test]
+    fn test_just_bigger_than_360_angle() {
+        let a = fit_degrees(360.0000000001);
+        assert!((a - 0.0).abs() < 0.00001f64);
+    }
+
+    #[test]
+    fn test_angle_normalization_invariant() {
+        let inputs = [360.0000000001, 720.0, -0.0000000001, -360.0, 1080.5];
+
+        for x in inputs {
+            let a = fit_degrees(x);
+            assert!(a >= 0.0 && a < 360.0);
+        }
     }
 }

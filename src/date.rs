@@ -1,7 +1,7 @@
 use std::fmt::{Display, Formatter, Result};
 
-use crate::julian_day::{get_julian_day, JulianDay};
 use crate::HoursMinSec;
+use crate::julian_day::{JulianDay, get_julian_day};
 
 #[derive(PartialEq)]
 pub struct Date {
@@ -82,13 +82,7 @@ impl Date {
     #[must_use]
     pub fn year_day(&self) -> u16 {
         // todo implement is_leap()
-        let k = {
-            if self.is_leap() {
-                1
-            } else {
-                2
-            }
-        };
+        let k = { if self.is_leap() { 1 } else { 2 } };
 
         (f64::from(275_u16 * u16::from(self.month)) / 9.0_f64) as u16
             - k * (f64::from(self.month + 9) / 12.0_f64) as u16
