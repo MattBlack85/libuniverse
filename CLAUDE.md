@@ -29,10 +29,13 @@ libuniverse/
 │   └── transform.rs
 ├── src/
 │   ├── lib.rs               # Crate root: public API, core types, exports
+│   ├── aberration.rs        # Annual stellar aberration (Meeus ch. 23)
 │   ├── date.rs              # Calendar date representation and operations
-│   ├── julian_day.rs        # Julian Day Number calculations
 │   ├── dynamical_time.rs    # Delta-T (ΔT) dynamical time corrections
-│   ├── sidereal_time.rs     # Mean sidereal time calculations
+│   ├── julian_day.rs        # Julian Day Number calculations
+│   ├── moon.rs              # Moon position — full Meeus ch. 47 series
+│   ├── nutation.rs          # Nutation Δψ/Δε — IAU 1980, 63-term series (Meeus ch. 22)
+│   ├── sidereal_time.rs     # Mean and apparent sidereal time
 │   └── transform.rs         # Coordinate system transformations
 ├── Cargo.toml               # Package manifest and dependencies
 ├── README.md                # Brief project description
@@ -45,12 +48,15 @@ libuniverse/
 
 | Module | Purpose |
 |---|---|
-| `lib.rs` | Public API surface: `HoursMinSec`, `DegMinSec`, `RightAscension`, `Declination`, `EqPosition`, `LongLatPosition`, `fit_degrees()` |
+| `lib.rs` | Public API surface: `HoursMinSec`, `DegMinSec`, `RightAscension`, `Declination`, `LongLatPosition`, `fit_degrees()` |
+| `aberration.rs` | `annual_aberration()` — equatorial (Δα, Δδ) corrections in arcseconds (Meeus ch. 23) |
 | `date.rs` | `Date` struct with `to_julian_day()`, `week_day()`, `year_day()`, `interval()` |
-| `julian_day.rs` | `JulianDay` struct, `get_julian_day()`, `to_calendar_date()`, `to_modified_jd()` |
-| `transform.rs` | `ra_to_deg()`, `deg_to_ra()`, `dec_to_deg()`, `deg_to_dms()` — all `#[must_use]` |
 | `dynamical_time.rs` | `delta_t()` — polynomial ΔT corrections for years −1999 to +3000 |
-| `sidereal_time.rs` | `get_mean_sidereal_time_from_date()` with optional FMA optimisation |
+| `julian_day.rs` | `JulianDay` struct, `get_julian_day()`, `to_calendar_date()`, `to_modified_jd()` |
+| `moon.rs` | `get_moon_position()` — full Meeus ch. 47 series; returns `MoonPosition` (lon, lat, dist, ra, dec) |
+| `nutation.rs` | `get_nutation()`, `get_delta_psi()`, `get_delta_psi_scalar()` — IAU 1980 63-term series (Meeus ch. 22) |
+| `sidereal_time.rs` | `get_mean_sidereal_time_from_date()` and `get_apparent_sidereal_time_from_date()` with optional FMA/AVX2 |
+| `transform.rs` | `ra_to_deg()`, `deg_to_ra()`, `dec_to_deg()`, `deg_to_dms()` — all `#[must_use]` |
 
 ---
 
@@ -58,15 +64,17 @@ libuniverse/
 
 ```rust
 // Integer time/angle components
-struct HoursMinSec { hours: i16, minutes: u8, seconds: f64 }
+struct HoursMinSec { hours: u8, minutes: u8, seconds: f64 }
 type RightAscension = HoursMinSec;
 
-struct DegMinSec { sign: i8, degrees: u16, minutes: u8, seconds: f64 }
+struct DegMinSec { negative: bool, degrees: i16, minutes: u8, seconds: f64 }
 type Declination = DegMinSec;
 
 // Composite position types
-struct EqPosition     { ra: RightAscension, dec: Declination }
-struct LongLatPosition { longitude: f64, latitude: f64 }
+struct LongLatPosition { long: DegMinSec, lat: DegMinSec }
+
+// Moon geocentric position
+struct MoonPosition { longitude: f64, latitude: f64, distance: f64, ra: f64, dec: f64 }
 
 // Date and Julian Day
 struct Date { year: i16, month: u8, day: f64, hours: u8, minutes: u8, seconds: f64 }

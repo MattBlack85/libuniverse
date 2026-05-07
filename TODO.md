@@ -45,7 +45,7 @@ implementation priority (foundational algorithms first).
 | Status | libnova function | Description |
 |--------|-----------------|-------------|
 | [~] | `ln_get_mean_sidereal_time` | Implemented as `get_mean_sidereal_time_from_date()` |
-| [ ] | `ln_get_apparent_sidereal_time` | Apparent sidereal time (mean + equation of equinoxes from nutation) |
+| [x] | `ln_get_apparent_sidereal_time` | Implemented as `get_apparent_sidereal_time_from_date()` — uses Δψ and true obliquity from nutation |
 
 ---
 
@@ -61,7 +61,7 @@ implementation priority (foundational algorithms first).
 
 | Status | libnova function | Description |
 |--------|-----------------|-------------|
-| [ ] | `ln_get_equ_aber` | Equatorial coordinates corrected for annual aberration — Meeus ch. 23 |
+| [x] | `ln_get_equ_aber` | Implemented as `annual_aberration()` in `aberration.rs` — returns (Δα, Δδ) in arcseconds — Meeus ch. 23 |
 | [ ] | `ln_get_ecl_aber` | Ecliptical coordinates corrected for annual aberration |
 
 ---
@@ -132,10 +132,10 @@ implementation priority (foundational algorithms first).
 
 | Status | libnova function | Description |
 |--------|-----------------|-------------|
-| [~] | `ln_get_lunar_equ_coords` | `get_moon_position()` returns RA/Dec — lower precision path still TODO |
-| [~] | `ln_get_lunar_equ_coords_prec` | High-precision path — verify against Meeus ch. 47 full table |
-| [~] | `ln_get_lunar_ecl_coords` | Ecliptic longitude/latitude returned by `get_moon_position()` |
-| [~] | `ln_get_lunar_earth_dist` | Distance field already in `MoonPosition.distance` |
+| [x] | `ln_get_lunar_equ_coords` | `get_moon_position()` returns RA/Dec — full Meeus ch. 47 series |
+| [x] | `ln_get_lunar_equ_coords_prec` | Same function — full 60-term Tables 47.A/47.B, verified against Meeus ch. 47 example |
+| [x] | `ln_get_lunar_ecl_coords` | Ecliptic longitude/latitude returned by `get_moon_position()` |
+| [x] | `ln_get_lunar_earth_dist` | Distance field in `MoonPosition.distance` |
 | [ ] | `ln_get_lunar_geo_posn` | Rectangular geocentric coordinates of the Moon |
 | [ ] | `ln_get_lunar_phase` | Phase angle of the Moon — Meeus ch. 48 |
 | [ ] | `ln_get_lunar_disk` | Illuminated fraction of the lunar disk |
