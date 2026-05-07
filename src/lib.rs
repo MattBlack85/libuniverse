@@ -169,26 +169,6 @@ impl Eq for DegMinSec {}
 pub type Declination = DegMinSec;
 pub type RightAscension = HoursMinSec;
 
-struct EqPosition {
-    ra: RightAscension,
-    dec: Declination,
-}
-
-impl EqPosition {
-    pub fn from_string(ra: &str, dec: &str) -> Self {
-        Self {
-            ra: RightAscension::from_string(ra),
-            dec: Declination::from_string(dec),
-        }
-    }
-}
-
-impl Display for EqPosition {
-    fn fmt(&self, f: &mut Formatter) -> Result {
-        write!(f, "ra:{} dec:{}", self.ra, self.dec)
-    }
-}
-
 pub struct LongLatPosition {
     pub long: DegMinSec,
     pub lat: DegMinSec,
@@ -196,7 +176,7 @@ pub struct LongLatPosition {
 
 #[cfg(test)]
 mod test {
-    use crate::{Declination, EqPosition, RightAscension, fit_degrees};
+    use crate::{Declination, RightAscension, fit_degrees};
 
     #[test]
     fn test_dec_display() {
@@ -222,16 +202,6 @@ mod test {
         let dec1 = Declination::from_string("-28 09 44.08");
         let dec2 = Declination::new(-28, 9, 44.08);
         assert_eq!(dec1, dec2);
-    }
-
-    #[test]
-    fn test_eq_pos() {
-        let ra = RightAscension::new(23, 44, 01.0);
-        let dec = Declination::new(-28, 9, 44.08);
-        let eq_pos = EqPosition::from_string("23 44 01", "-28 09 44.08");
-        assert_eq!(eq_pos.ra, ra);
-        assert_eq!(eq_pos.dec, dec);
-        assert_eq!(format!("{}", eq_pos), "ra:23h 44m 1s dec:-28° 9' 44.08''");
     }
 
     #[test]
